@@ -18,9 +18,8 @@ def process(options):
         options.dataset_name, root='../../', dirs=['models', 'results'], exp=options.exp_path, return_paths=True, verbose=options.verbose)
 
     ######### Dataset processing ###########
-    dataset_dict = ucr_loader.get_datasets(options.root_path, prefix='**/')
-    trainX, trainY, testX, testY = ucr_loader.load_data(
-        dataset_dict[options.dataset_name])
+    data_directory = os.path.realpath(os.path.join(os.getcwd(), '..', '..', 'data'))
+    trainX, trainY, testX, testY = ucr_loader.load_data(data_directory)
     trainX, trainY, testX, testY = ucr_loader.preprocess_data(
         trainX, trainY, testX, testY, normalize=options.normalize, standardize=options.standardize)
     valX, valY = None, None
