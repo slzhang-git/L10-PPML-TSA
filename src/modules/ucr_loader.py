@@ -28,7 +28,7 @@ def to_array(df):
     return result
 
 def load_data(path):
-    fname = path.split('/')[-2]
+    fname = "ElectricDevices"
     train_path = os.path.join(path, fname + '_TRAIN.ts')
     test_path = os.path.join(path, fname + '_TEST.ts')
     if os.path.exists(train_path):
