@@ -9,7 +9,8 @@ import tensorflow as tf
 sys.path.append("../")
 from modules.model_definition import FCN, FDN, LSTM, AlexNet, LeNet
 from modules import mean_cr_utils, model_trainer, ucr_loader, utils
-
+import matplotlib.pyplot as plt     # added for result visualization
+import time    # added for result visualization
 
 def process(options):
     ########## Global settings #############
@@ -40,6 +41,17 @@ def process(options):
                          'FCN': FCN().build_default, 'FDN': FDN().build_default, 'LeNet': LeNet().build_default}
 
     report_paths = []
+    list_accuracy_1 = []    # for result visualization
+    list_accuracy_2 = []  # for result visualization
+    list_accuracy_3 = []  # for result visualization
+    list_accuracy_4 = []  # for result visualization
+    list_accuracy_5 = []  # for result visualization
+    list_accuracy_6 = []  # for result visualization
+    list_accuracy_7 = []  # for result visualization
+    list_accuracy_weighted_average = []  # for result visualization
+    
+    start_time = time.time()    # added for result visualization
+    
     for i in range(options.runs):
         tf.random.set_seed(i)
         
@@ -48,14 +60,22 @@ def process(options):
         ####### Perform baseline model #########
         model_path = os.path.join(model_dir, options.architecture + '_batch-' + str(
             options.batch_size) + '_run-' + str(i) + '.h5') if options.save_model else None
+        
+        model_path_previous = os.path.join(model_dir, options.architecture + '_batch-' + str(
+            options.batch_size) + '_run-' + str(i-1) + '.h5') if options.save_model else None
 
         if os.path.exists(model_path) and options.load_model:
             model = architecture_func[options.architecture](
                 trainX.shape[1:], n_classes, activation='softmax', verbose=options.verbose)
             model.load_weights(model_path)
         else:
-            model = architecture_func[options.architecture](
-                trainX.shape[1:], n_classes, activation='softmax', verbose=options.verbose)
+            if os.path.exists(model_path_previous):     # added for continuous training across runs
+                model = architecture_func[options.architecture](
+                    trainX.shape[1:], n_classes, activation='softmax', verbose=options.verbose)
+                model.load_weights(model_path_previous)
+            else:
+                model = architecture_func[options.architecture](
+                    trainX.shape[1:], n_classes, activation='softmax', verbose=options.verbose)
             model.compile(
                 optimizer='SGD', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
             model_trainer.train(model, trainX, trainY, validation_data=(
@@ -69,6 +89,30 @@ def process(options):
         utils.compute_classification_report(
             testY, preds, save=report_path, verbose=options.verbose, store_dict=True)
         report_paths.append(report_path.replace('.txt', '.pickle'))
+        
+        list_accuracy_1.append(performance['0']['precision'])
+        list_accuracy_2.append(performance['1']['precision'])
+        list_accuracy_3.append(performance['2']['precision'])
+        list_accuracy_4.append(performance['3']['precision'])
+        list_accuracy_5.append(performance['4']['precision'])
+        list_accuracy_6.append(performance['5']['precision'])
+        list_accuracy_7.append(performance['6']['precision'])
+        list_accuracy_weighted_average.append(performance['weighted avg']['precision'])
+        
+    plt.plot(list_accuracy_1, label='agent 1')
+    plt.plot(list_accuracy_2, label='agent 2')
+    plt.plot(list_accuracy_3, label='agent 3')
+    plt.plot(list_accuracy_4, label='agent 4')
+    plt.plot(list_accuracy_5, label='agent 5')
+    plt.plot(list_accuracy_6, label='agent 6')
+    plt.plot(list_accuracy_7, label='agent 7')
+    plt.plot(list_accuracy_weighted_average, label='weighted average')
+    plot_tittle = 'run time: ' + str(training_time) + ' seconds'
+    plt.title(plot_tittle)
+    plt.xlabel('aggregation runs')
+    plt.ylabel('accuracy')
+    plt.legend(loc='lower right')
+    plt.show()
 
     ###### Create mean eval report #########
     if options.save_mcr:
