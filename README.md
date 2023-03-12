@@ -35,3 +35,6 @@ Please consider citing our associated [paper](#):
         year={2021}
     }
 ```
+
+## How to run the code in our experiment
+--The mainfunction file: "/src/bash_scripts/execute_baseline.sh". Set the model name and run the file to get the visualized result.
