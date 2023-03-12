@@ -38,3 +38,9 @@ Please consider citing our associated [paper](#):
 
 ## How to run the code in our experiment
 --The mainfunction file: "/src/bash_scripts/execute_baseline.sh". Set the model name and run the file to get the visualized result.
+
+--The folder "data" contains the original dataset to learn a model from
+
+--The folder "results" will contain the performance of the trained model
+
+--The folder "models" will contain the model to be trained
